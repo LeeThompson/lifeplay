@@ -1,0 +1,214 @@
+This is a multi-page menu tool for LifePlay modders.
+
+It allows you to present a multi-page menu to view and/or edit values.
+
+Unfortunately, it does require some coding work and is a little complicated,
+this document will guide you through it.
+
+
+Purpose
+-------
+
+While you can edit stats of any NPC in game, they need to be a contact and
+it does not cover any actor variables that may be set.
+
+This allows modders to debug values in-game.
+
+
+Variables
+---------
+
+flagAllowEdit is a boolean that controls the default to enable the menu
+item choice state.   If false it will always be grayed out.
+
+menuPageCount is the last page number.
+menuPage is the current page number.   It is usually set to 1 but you
+could set it to menuPageCount or another page if you want to.   
+menuTitle is a string that is the title of the menu.
+pageTitle can be defined on each menu page, if it is not set the
+    menuTitle is used instead.
+
+IMPORTANT!
+    Strings must be alpha/numeric and spaces only!!!
+    If you see "0" instead, the string has invalid characters in it.
+
+
+Walkthrough
+-----------
+
+At the start of each page menu loop, the value of menuPage is checked and
+the fields for that page are set including Name, any ranges and what
+the current value is.
+
+Please note, if you are reading any non vin_Base values to wrapper
+loading the values with an isModEnabled block.
+
+
+Each page menu block works like this:
+	If menuPage == 1
+	    flagItem1 = flagAllowEdit
+	    flagItem2 = flagAllowEdit
+	    flagItem3 = flagAllowEdit
+	    flagItem4 = flagAllowEdit
+	    flagItem5 = flagAllowEdit
+	    flagItem6 = flagAllowEdit
+	    displayItem1 = "Attractiveness"
+	    displayItem2 = "Cooking"
+	    displayItem3 = "Dance"
+	    displayItem4 = "Fitness"
+	    displayItem5 = "Intelligence"
+	    displayItem6 = "Interpersonal"
+	    valueItem1 = Actor:attractiveness
+	    valueItem2 = Actor:cooking
+	    valueItem3 = Actor:dance
+	    valueItem4 = Actor:fitness
+	    valueItem5 = Actor:intelligence
+	    valueItem6 = Actor:interpersonal
+	Endif
+
+flagItemX is a boolean that determines if the choice line is enabled or not.
+displayItemX is the display name of the item.
+valueItemX is the value of the item.
+
+There are several additional values that are optional:
+
+minItemX is the lowest value that item is allowed to be.
+maxItemX is the maximum value that item is allowed to be.
+typeItemX is the item type, it will set min and max values for you.
+
+Types:
+	-1	Not Used		this menu item is not used
+	0	Custom			minItemX and maxItemX need to be set
+	1	Standard Stat		0 - 100
+	2	"Wide" Stat		-100 - 100
+	3	Preference Stat		-60 - 100
+	4	Boolean 		0 - 1 (false, true)
+
+
+There are optional variables named for each type which may be helpful:
+
+typeNotUsed
+typeCustom
+typeStandardStat
+typeWideStat
+typePreference
+typeBoolean
+
+Generally if an item is not used on the page, all numeric values are set to -1.
+
+
+When run, the menu will allow (if enabled) the user to select any of the
+values on that page.  This will start the "edit menu".
+
+Depending on type, the value can be incremented or decremented (or toggled)
+or have a new random value generated.
+
+The updated value can be discarded (cancel) or applied.
+
+The application of the value occurs in the If Elseif Endif block after the
+edit menu.   Like the menu setup, menuPage's value is checked and the
+updated value is applied to the stat or variable.
+
+(I usually find it helpful to copy the page menu If Elseif Endif block and
+paste it in notepad as a reference for the application of values.
+
+
+The Page Menu:
+        0:: false:: "<pageTitle> (PAGE <menuPage> / <menuPageCount>) (<Actor.name_last>, <Actor.name>)"
+        1:: flagItem1:: "<displayItem1>: <valueItem1>"
+        2:: flagItem2:: "<displayItem2>: <valueItem2>"
+        3:: flagItem3:: "<displayItem3>: <valueItem3>"
+        4:: flagItem4:: "<displayItem4>: <valueItem4>"
+        5:: flagItem5:: "<displayItem5>: <valueItem5>"
+        6:: flagItem6:: "<displayItem6>: <valueItem6>"
+        7:: menuPage < menuPageCount:: "[ NEXT > ]"
+        8:: menuPage > 1:: "[ < PREVIOUS ]"
+        9:: "[ UP ]"
+
+
+
+Consider this page menu block, on page 1 it is the "Dance" stat and on
+page 2 it is the "Masochist" stat.
+
+Note that the typeItem value is different, that's because masochist has
+a range of -100 to 100 instead of 0 to 100.
+
+        If menuPage == 1
+	    typeItem3 = typeStandardStat
+            flagItem3 = flagAllowEdit
+            displayItem3 = "Dance"
+            valueItem3 = Actor:dance
+	Elseif menuPage == 2
+            typeItem3 = typeWideStat
+            flagItem3 = flagAllowEdit
+            displayItem3 = "Masochist"
+            valueItem3 = Actor:masochist
+        Endif
+
+The start of the edit block for any item works like this (this is for the
+third item on any page).  
+
+Each item's variable (always numbered 1 to 6) is copied to a standardized
+version.
+
+If typeItem is being used, minimum and maximum values are set for you.
+If you always want to specify it yourself, use typeItemX = 0
+	
+	valueItem = valueItem3
+	displayItem = displayItem3
+	typeItem = typeItem3
+	If typeItem == typeStandardStat
+	    minItem = 0
+	    maxItem = 100
+	Elseif typeItem == typeWideStat
+	    minItem = -100
+	    maxItem = 100
+	Elseif typeItem == typePreference
+	    minItem = -60
+	    maxItem = 100
+	Elseif typeItem == typeBoolean
+	    minItem = 0
+	    maxItem = 1
+	Else
+	    minItem = minItem3
+	    maxItem = maxItem3
+	Endif
+	valueItemOriginal = valueItem
+
+This is the start of the edit menu, it has two modes: boolean and value
+
+	loopEditMenu = true
+	While loopEditMenu
+	    If flagItemIsBoolean
+	        0:: false:: "<displayItem> (<valueItem>)"
+	        1:: "Enable"
+	        2:: "Disable"
+	        8:: "[ CANCEL ]"
+	        9:: "[ APPLY ]"
+	    Else
+	        0:: false:: "<displayItem> (<valueItem>)"
+	        1:: "Decrease"
+	        2:: "Increase"
+	        3:: "Reroll"
+	        4:: "Change"
+	        8:: "[ CANCEL ]"
+	        9:: "[ APPLY ]"
+	    Endif
+
+The edit menu's [ APPLY ] option s block works like this:
+	Elseif 9	
+		If menuPage == 1		
+		     Actor:dance => valueItem
+		Elseif menuPage == 2		     
+		     Actor:masochist => valueItem	
+		Endif
+
+
+===============================================================================
+Repository:
+https://github.com/LeeThompson/lifeplay
+
+A version of this documentation is on the repository's wiki.
+
+===============================================================================
+This document was last updated: 2023-02-09 10:54

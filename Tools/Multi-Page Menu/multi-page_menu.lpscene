@@ -1,0 +1,939 @@
+WHAT: none
+WHERE: none
+WHEN: 0-24
+WHO: none
+OTHER:
+
+//  VERSION: 2023-02-07 14:05
+// ***************************************************************************
+//  MULTI-PAGE MENU
+// ***************************************************************************
+//  This is a multi-page menu for LifePlay
+// ***************************************************************************
+//  A note on usage:
+//  LifePlay (as of 5.23) cannot support most symbols in string values.
+// ***************************************************************************
+//  NOTES:
+//
+//  It is a little klunky in some respects but this is due to limitations
+//  of the scripting language.
+//
+//  Some of it is also due the amount of space If Then Else blocks take up.
+//
+// ***************************************************************************
+//  MENU MAIN TYPE: This allows editing of numerical values
+// ***************************************************************************
+
+// ***************************************************************************
+//  SETTINGS
+// ***************************************************************************
+//  menuPageCount
+//      (integer) Maximum number of pages
+//
+//  flagAllowEdit
+//      (boolean) Allow edit mode.
+//
+//  instead of specifying min/max for each item, you can also set the type:
+//  1   standard stat ( 0 - 100)
+//  2   wide stat     ( -100 - 100)
+//  3   preference    ( -60 - 100)
+//  4   boolean       ( 0 or 1)
+// ***************************************************************************
+//  Making the menu work:
+//      First you need to define the items on each page.
+//      Second, you need to work on the edit section so the values get applied
+//          if you're doing a read only menu you can skip this step.
+//
+// ***************************************************************************
+
+//  TESTING WRAPPER [START]
+SceneStart()
+chooseContact()
+Actor = getSpecific(chooseContact)
+//  TESTING WRAPPER [END]
+
+//  For readability
+typeStandardStat = 1
+typeWideStat = 2
+typePreference = 3
+typeBoolean = 4
+typeNotUsed = -1
+typeCustom = 0
+
+//  Set menu options
+flagAllowEdit = true
+menuTitle = "STAT EDITOR"
+menuPageCount = 3
+menuPage = 1
+
+//  Start Menu
+If menuPageCount > 0
+    loopMainMenu = true
+Else
+    loopMainMenu = false
+Endif
+While loopMainMenu
+    If menuPage < 1
+        menuPage = 1
+    Elseif menuPage > menuPageCount
+        menuPage = menuPageCount
+    Endif
+    loopPageMenu = true
+    While loopPageMenu
+        flagItem1 = false
+        flagItem2 = false
+        flagItem3 = false
+        flagItem4 = false
+        flagItem5 = false
+        flagItem6 = false
+        typeItem1 = typeStandardStat
+        typeItem2 = typeStandardStat
+        typeItem3 = typeStandardStat
+        typeItem4 = typeStandardStat
+        typeItem5 = typeStandardStat
+        typeItem6 = typeStandardStat
+        minItem1 = -1
+        maxItem1 = -1
+        minItem2 = -1
+        maxItem2 = -1
+        minItem3 = -1
+        maxItem3 = -1
+        minItem4 = -1
+        maxItem4 = -1
+        minItem5 = -1
+        maxItem5 = -1
+        minItem6 = -1
+        maxItem6 = -1
+        displayItem1 = "Not Used"
+        displayItem2 = "Not Used"
+        displayItem3 = "Not Used"
+        displayItem4 = "Not Used"
+        displayItem5 = "Not Used"
+        displayItem6 = "Not Used"
+        valueItem1 = -1
+        valueItem2 = -1
+        valueItem3 = -1
+        valueItem4 = -1
+        valueItem5 = -1
+        valueItem6 = -1
+        If menuPage == 1
+            flagItem1 = flagAllowEdit
+            flagItem2 = flagAllowEdit
+            flagItem3 = flagAllowEdit
+            flagItem4 = flagAllowEdit
+            flagItem5 = flagAllowEdit
+            flagItem6 = flagAllowEdit
+            displayItem1 = "Attractiveness"
+            displayItem2 = "Cooking"
+            displayItem3 = "Dance"
+            displayItem4 = "Fitness"
+            displayItem5 = "Intelligence"
+            displayItem6 = "Interpersonal"
+            valueItem1 = Actor:attractiveness
+            valueItem2 = Actor:cooking
+            valueItem3 = Actor:dance
+            valueItem4 = Actor:fitness
+            valueItem5 = Actor:intelligence
+            valueItem6 = Actor:interpersonal
+        Elseif menuPage == 2
+            flagItem1 = flagAllowEdit
+            flagItem2 = flagAllowEdit
+            flagItem3 = flagAllowEdit
+            flagItem4 = flagAllowEdit
+            flagItem5 = flagAllowEdit
+            flagItem6 = flagAllowEdit
+            itemType3 = typeWideStat
+            displayItem1 = "Job Experience"
+            displayItem2 = "Martial"
+            displayItem3 = "Masochist"
+            displayItem4 = "Muscle"
+            displayItem5 = "Music"
+            displayItem6 = "Perversion"
+            valueItem1 = Actor:jobexperience
+            valueItem2 = Actor:martial
+            valueItem3 = Actor:masochist
+            valueItem4 = Actor:muscle
+            valueItem5 = Actor:music
+            valueItem6 = Actor:perversion
+        Elseif menuPage == 3
+            flagItem1 = flagAllowEdit
+            flagItem2 = flagAllowEdit
+            flagItem3 = flagAllowEdit
+            typeItem3 = typeBoolean
+            displayItem1 = "Porn Fame"
+            displayItem2 = "Sneak"
+            displayItem3 = "Pregnant"
+            valueItem1 = Actor:pornfame
+            valueItem2 = Actor:sneak
+            valueItem3 = Actor.getActorVar(tag_Pregnant)
+            If valueItem3 > 0
+                valueItem3 = true
+            Else
+                valueItem3 = false
+            Endif
+        Endif
+        If pageTitle.isString("")
+            pageTitle = menuTitle
+        Endif
+
+        0:: false:: "<pageTitle> (PAGE <menuPage> / <menuPageCount>) (<Actor.name_last>, <Actor.name>)"
+        1:: flagItem1:: "<displayItem1>: <valueItem1>"
+        2:: flagItem2:: "<displayItem2>: <valueItem2>"
+        3:: flagItem3:: "<displayItem3>: <valueItem3>"
+        4:: flagItem4:: "<displayItem4>: <valueItem4>"
+        5:: flagItem5:: "<displayItem5>: <valueItem5>"
+        6:: flagItem6:: "<displayItem6>: <valueItem6>"
+        7:: menuPage < menuPageCount:: "[ NEXT > ]"
+        8:: menuPage > 1:: "[ < PREVIOUS ]"
+        9:: "[ UP ]"
+
+        If 1
+            valueItem = valueItem1
+            displayItem = displayItem1
+            typeItem = typeItem1
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem1
+                maxItem = maxItem1
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:attractiveness => valueItem
+                    Elseif menuPage == 2
+                        Actor:jobexperience => valueItem
+                    Elseif menuPage == 3
+                        Actor:pornfame => valueItem
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 2
+            valueItem = valueItem2
+            displayItem = displayItem2
+            typeItem = typeItem2
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem2
+                maxItem = maxItem2
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:cooking => valueItem
+                    Elseif menuPage == 2
+                        Actor:martial => valueItem
+                    Elseif menuPage == 3
+                        Actor:sneak => valueItem
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 3
+            valueItem = valueItem3
+            displayItem = displayItem3
+            typeItem = typeItem3
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem3
+                maxItem = maxItem3
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:dance => valueItem
+                    Elseif menuPage == 2
+                        Actor:masochist => valueItem
+                    Elseif menuPage == 3
+                        If valueItem
+                            Actor.setActorVar(tag_Pregnant, 1)
+                        Else
+                            Actor.setActorVar(tag_Pregnant, 0)
+                        Endif
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 4
+            valueItem = valueItem4
+            displayItem = displayItem4
+            typeItem = typeItem4
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem4
+                maxItem = maxItem4
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:fitness => valueItem
+                    Elseif menuPage == 2
+                        Actor:muscle => valueItem
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 5
+            valueItem = valueItem5
+            displayItem = displayItem5
+            typeItem = typeItem5
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem5
+                maxItem = maxItem5
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:intelligence => valueItem
+                    Elseif menuPage == 2
+                        Actor:music => valueItem
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 6
+            valueItem = valueItem6
+            displayItem = displayItem6
+            typeItem = typeItem6
+            If typeItem == 1
+                minItem = 0
+                maxItem = 100
+            Elseif typeItem == 2
+                minItem = -100
+                maxItem = 100
+            Elseif typeItem == 3
+                minItem = -60
+                maxItem = 100
+            Elseif typeItem == 4
+                minItem = 0
+                maxItem = 1
+            Else
+                minItem = minItem6
+                maxItem = maxItem6
+            Endif
+            If typeItem == 4 || minItem == 0 && maxItem == 1
+                flagItemIsBoolean = true
+            Else
+                flagItemIsBoolean = false
+            Endif
+            valueItemOriginal = valueItem
+            loopEditMenu = true
+            While loopEditMenu
+                If flagItemIsBoolean
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Enable"
+                    2:: "Disable"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Else
+                    0:: false:: "<displayItem> (<valueItem>)"
+                    1:: "Decrease"
+                    2:: "Increase"
+                    3:: "Reroll"
+                    4:: "Change"
+                    8:: "[ CANCEL ]"
+                    9:: "[ APPLY ]"
+                Endif
+
+                If 1
+                    If flagItemIsBoolean
+                        valueItem = true
+                    Else
+                        valueItem -= 1
+                        If minItem != -1
+                            If valueItem < minItem
+                                valueItem = minItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 2
+                    If flagItemIsBoolean
+                        valueItem = false
+                    Else
+                        valueItem += 1
+                        If maxItem != -1
+                            If valueItem > maxItem
+                                valueItem = maxItem
+                            Endif
+                        Endif
+                    Endif
+                Elseif 3
+                    If minItem == -100 && maxItem == 100
+                        tempValue = Random(-100, 100)
+                    Elseif minItem == 0 && maxItem == 100
+                        tempValue = Random(0, 100)
+                    Elseif minItem == 18 && maxItem == 80
+                        tempValue = Random(18, 80)
+                    Elseif minItem == -60 && maxItem == 100
+                        tempValue = Random(-60, 100)
+                    Elseif minItem == -60 && maxItem == 60
+                        tempValue = Random(-60, 60)
+                    Elseif minItem == 0 && maxItem == -1
+                        tempValue = Random(0, 100000)
+                    Elseif minItem == 0 && maxItem == 10000
+                        tempValue = Random(0, 10000)
+                    Endif
+                    valueItem = tempValue
+                Elseif 4
+                    flagEnableMinimum = true
+                    flagEnableMaximum = true
+                    If minItem == -1 || minItem == -2
+                        flagEnableMinimum = false
+                    Endif
+                    If maxItem == -1 || maxItem == -2
+                        flagEnableMaximum = false
+                    Endif
+                    0:: false:: "CHANGE <displayItem> (<valueItem>)"
+                    1:: flagEnableMinimum:: "Minimum"
+                    2:: "Zero"
+                    3:: flagEnableMaximum:: "Maximum"
+                    4:: "Reset"
+                    5:: "[ < BACK ]"
+
+                    If 1
+                        valueItem = minItem
+                    Elseif 2
+                        valueItem = 0
+                    Elseif 3
+                        valueItem = maxItem
+                    Elseif 4
+                        valueItem = valueItemOriginal
+                    Elseif 5
+                    Endif
+                Elseif 8
+                    loopEditMenu = false
+                Elseif 9
+                    If menuPage == 1
+                        Actor:interpersonal => valueItem
+                    Elseif menuPage == 2
+                        Actor:perversion => valueItem
+                    Endif
+                    loopEditMenu = false
+                Endif
+            EndWhile
+        Elseif 7
+            menuPage += 1
+            If menuPage > menuPageCount
+                menuPage = menuPageCount
+            Endif
+        Elseif 8
+            menuPage -= 1
+            If menuPage < 1
+                menuPage = 1
+            Endif
+        Elseif 9
+            loopMainMenu = false
+            loopPageMenu = false
+        Endif
+    EndWhile
+EndWhile
+
+//  TESTING WRAPPER [START]
+SceneEnd()
+//  TESTING WRAPPER [END]
